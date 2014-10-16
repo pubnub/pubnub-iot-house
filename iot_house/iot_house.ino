@@ -9,7 +9,7 @@ Servo garageDoor;
 
 // Some Ethernet shields have a MAC address printed on a sticker on the shield;
 // fill in that address here, or choose your own at random:
-byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
+byte mac[] = {0x90, 0xA2, 0xEA, 0x01, 0x97, 0x10};
 
 int lightLeft =7;
 int lightRight = 6;
@@ -68,21 +68,44 @@ void flash(int ledPin)
 	}
 }
 
+
+void publish() {
+  
+  Serial.println("publishing a message");
+  
+  client = PubNub.publish(channel, "\"house:1\"");
+  
+  if (!client) {
+    Serial.println("publishing error");
+    delay(1000);
+    return;
+  }
+  
+  while (client->connected()) {
+    while (client->connected() && !client->available()) ;
+    char c = client->read();
+    Serial.print(c);
+  }
+  
+  client->stop();
+  Serial.println();
+  
+}
+
 void loop()
 {
 	Ethernet.maintain();
 
-	EthernetClient *client;
-
+  	PubSubClient *client;
 	
 	Serial.println("waiting for a message (subscribe)");
-	PubSubClient *pclient = PubNub.subscribe(channel);
-	if (!pclient) {
+	client = PubNub.subscribe(channel);
+
+	if (!client) {
 		Serial.println("subscription error");
-                error();
-		delay(1000);
+//                error();
 		return;
-        }
+	}
 
   String messages[10];
 
@@ -92,9 +115,9 @@ void loop()
   String message = "";
   char c;
   
-  while (pclient->wait_for_data()) {
+  while (client->wait_for_data()) {
     
-    c = pclient->read();
+    c = client->read();
     
     if(inside_command && c != '"') {
       messages[num_commands] += c;
@@ -116,7 +139,7 @@ void loop()
     message += c;
 
   }
-  pclient->stop();
+  client->stop();
   
   for (i = 0; i < num_commands; i++){
     
@@ -169,7 +192,6 @@ void loop()
   
   Serial.print(message);
   
-  pclient->stop();
   Serial.println();
 
 }
