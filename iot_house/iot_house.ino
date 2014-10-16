@@ -9,12 +9,12 @@ Servo garageDoor;
 
 // Some Ethernet shields have a MAC address printed on a sticker on the shield;
 // fill in that address here, or choose your own at random:
-byte mac[] = {0x90, 0xA2, 0xEA, 0x01, 0x97, 0x10};
+byte mac[] = {0x90, 0x90, 0xEA, 0x01, 0x97, 0x10};
 
-int lightLeft =7;
-int lightRight = 6;
-int lightRoom = 5;
-int lightGarage = 4;
+int lightLeft =8;
+int lightRight = 7;
+int lightRoom = 6;
+int lightGarage = 5;
 
 int i;
 
@@ -33,7 +33,7 @@ void setup()
 
   pinMode(SDCARD_CS,OUTPUT);
   digitalWrite(SDCARD_CS,HIGH);//Deselect the SD card
-  
+    
 	Serial.begin(9600);
 	Serial.println("Serial set up");
 
@@ -54,6 +54,7 @@ void setup()
   pinMode(lightRoom, OUTPUT);
   pinMode(lightGarage, OUTPUT);
   
+  off();
   
 }
 
