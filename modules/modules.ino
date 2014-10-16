@@ -9,10 +9,9 @@ int rightWindow = 3;
 int room = 4;
 
 void setup() {
-
   
-  frontDoor.attach(10); // servo on digital pin 10
-  garageDoor.attach(11); 
+  frontDoor.attach(11); // servo on digital pin 10
+  garageDoor.attach(12); 
   
   pinMode(leftWindow, OUTPUT);
   pinMode(rightWindow, OUTPUT);
@@ -20,29 +19,51 @@ void setup() {
   
 }
 
+void garage(boolean open){
+  
+  if(open) {
+     garageDoor.write(80);
+  } else {
+     garageDoor.write(140);
+  }
+  
+}
+
+void door(boolean open){
+  
+  if(open) {
+     frontDoor.write(90);
+  } else {
+     frontDoor.write(0);
+  }
+  
+}
+
 void loop() {
+  
+   garage(false);
 
    digitalWrite(leftWindow, HIGH);
   
-   frontDoor.write(45);
-   delay(1000);
+   delay(600);
+   
+   door(false);
+   
+   delay(600);
    
    digitalWrite(rightWindow, HIGH);
+  
+   garage(true);
+  
+   delay(600);
    
-   frontDoor.write(135);
-   delay(1000);
+   door(true);
    
-   digitalWrite(room, HIGH);
    
-   garageDoor.write(45);
-   delay(1000);
-   
+   delay(600);
+   digitalWrite(room, HIGH);   
    digitalWrite(leftWindow, LOW);
    digitalWrite(rightWindow, LOW);
    digitalWrite(room, LOW);
-   
-   garageDoor.write(135);
-   delay(1000);
-   
 }
 
