@@ -9,7 +9,7 @@ Servo garageDoor;
 
 // Some Ethernet shields have a MAC address printed on a sticker on the shield;
 // fill in that address here, or choose your own at random:
-byte mac[] = {0x90, 0x90, 0xEA, 0x01, 0x97, 0x10};
+byte mac[] = {0x68, 0x5b, 0x35A, 0xCF, 0xA6, 0x4E};
 
 int lightLeft =8;
 int lightRight = 7;
@@ -39,9 +39,11 @@ void setup()
 
 	while (!Ethernet.begin(mac)) {
 		Serial.println("Ethernet setup error");
+                blink(1000, 999999);
 		delay(1000);
 	}
 	Serial.println("Ethernet set up");
+        blink(500, 10);
 
 	PubNub.begin(pubkey, subkey);
 	Serial.println("PubNub set up");
@@ -74,7 +76,7 @@ void publish() {
   
   Serial.println("publishing a message");
   
-  client = PubNub.publish(channel, "\"house:1\"");
+  client = PubNub.publish(channel, "\"house:subscribe_error\"");
   
   if (!client) {
     Serial.println("publishing error");
@@ -95,6 +97,9 @@ void publish() {
 
 void loop()
 {
+  
+  
+  
 	Ethernet.maintain();
 
   	PubSubClient *client;
@@ -103,8 +108,8 @@ void loop()
 	client = PubNub.subscribe(channel);
 
 	if (!client) {
+                publish();
 		Serial.println("subscription error");
-//                error();
 		return;
 	}
 
@@ -179,11 +184,11 @@ void loop()
     }
     
     if(subject == "blink") {
-      blink(100, value);
+      blink(100, valueString.toInt());
     }
     
     if(subject == "pingpong") {
-      pingpong(value);
+      pingpong(valueString.toInt());
     }
 
     Serial.println(subject);
@@ -194,6 +199,8 @@ void loop()
   Serial.print(message);
   
   Serial.println();
+
+  delay(2000);
 
 }
 
@@ -267,10 +274,6 @@ void blink(int delayn, int count) {
     delay(delayn);
   } 
   
-}
-
-void error() {
-  blink(1000, 5);
 }
 
 void pingpong(int count) {
