@@ -4,19 +4,17 @@
 #include <string.h>
 #include <Servo.h>
 
-byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };  
-
 Servo frontDoor;
 Servo garageDoor;
+
+// Some Ethernet shields have a MAC address printed on a sticker on the shield;
+// fill in that address here, or choose your own at random:
+byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 
 int lightLeft =7;
 int lightRight = 6;
 int lightRoom = 5;
 int lightGarage = 4;
-
-char pubkey[] = "demo"; 
-char subkey[] = "demo";
-char channel[] = "pubnub_iot_house";
 
 int i;
 
@@ -25,15 +23,29 @@ EthernetClient *client;
 #define W5200_CS  10
 #define SDCARD_CS 4
 
-void setup() {
-  
-  reset();
+char pubkey[] = "demo";
+char subkey[] = "demo";
+char channel[] = "pubnub_iot_house";
+
+void setup()
+{
+
 
   pinMode(SDCARD_CS,OUTPUT);
   digitalWrite(SDCARD_CS,HIGH);//Deselect the SD card
   
-  Serial.begin(9600);
-  
+	Serial.begin(9600);
+	Serial.println("Serial set up");
+
+	while (!Ethernet.begin(mac)) {
+		Serial.println("Ethernet setup error");
+		delay(1000);
+	}
+	Serial.println("Ethernet set up");
+
+	PubNub.begin(pubkey, subkey);
+	Serial.println("PubNub set up");
+
   frontDoor.attach(14);
   garageDoor.attach(15); 
   
@@ -41,32 +53,128 @@ void setup() {
   pinMode(lightRight, OUTPUT);
   pinMode(lightRoom, OUTPUT);
   pinMode(lightGarage, OUTPUT);
-
-  delay(5000);
   
-  // start the Ethernet connection:
-  if (Ethernet.begin(mac) == 0) {
-    Serial.println("Failed to configure Ethernet using DHCP");
-    // no point in carrying on, so do nothing forevermore:
-    error();
-    for(;;)
-      ;
-  } else {
-    Serial.print("success: ");  
-    Serial.println(Ethernet.localIP());
-  }
-  
-  // give the Ethernet shield a second to initialize:
-  delay(1000);
-
-  Serial.println("Ethernet set up");
-
-  PubNub.begin(pubkey, subkey);
-  Serial.println("PubNub set up");
-  
-  demo();
   
 }
+
+void flash(int ledPin)
+{
+	/* Flash LED three times. */
+	for (int i = 0; i < 3; i++) {
+		digitalWrite(ledPin, HIGH);
+		delay(100);
+		digitalWrite(ledPin, LOW);
+		delay(100);
+	}
+}
+
+void loop()
+{
+	Ethernet.maintain();
+
+	EthernetClient *client;
+
+	
+	Serial.println("waiting for a message (subscribe)");
+	PubSubClient *pclient = PubNub.subscribe(channel);
+	if (!pclient) {
+		Serial.println("subscription error");
+                error();
+		delay(1000);
+		return;
+        }
+
+  String messages[10];
+
+  boolean inside_command = false; 
+  int num_commands = 0;
+  
+  String message = "";
+  char c;
+  
+  while (pclient->wait_for_data()) {
+    
+    c = pclient->read();
+    
+    if(inside_command && c != '"') {
+      messages[num_commands] += c;
+    }
+
+    if(c == '"') {
+  
+      if(inside_command) {         
+        
+        num_commands = num_commands + 1;
+        inside_command = false;
+        
+      } else {     
+        inside_command = true;
+      }
+      
+    }
+  
+    message += c;
+
+  }
+  pclient->stop();
+  
+  for (i = 0; i < num_commands; i++){
+    
+    int colonIndex = messages[i].indexOf(':');
+    
+    String subject = messages[i].substring(0, colonIndex);
+    String valueString = messages[i].substring(colonIndex + 1, messages[i].length());
+    boolean value = false;
+    
+    if(valueString == "1") {
+      value = true;
+    }
+
+    if(subject == "garage") {
+      garage(value);
+    }
+
+    if(subject == "door") {
+      door(value);
+    }
+
+    if(subject == "lightLeft") {
+      light(lightLeft, value);
+    }
+
+    if(subject == "lightRight") {
+      light(lightRight, value);
+    }
+
+    if(subject == "lightRoom") {
+      light(lightRoom, value);
+    }
+
+    if(subject == "lightGarage") {
+      light(lightGarage, value);
+    }
+    
+    if(subject == "blink") {
+      blink(100, value);
+    }
+    
+    if(subject == "pingpong") {
+      pingpong(value);
+    }
+
+    Serial.println(subject);
+    Serial.println(value);
+    
+  }
+  
+  Serial.print(message);
+  
+  pclient->stop();
+  Serial.println();
+
+}
+
+
 
 void light(int ledPin, boolean on) {
   
@@ -139,7 +247,7 @@ void blink(int delayn, int count) {
 }
 
 void error() {
-  blink(1000, 100);
+  blink(1000, 5);
 }
 
 void pingpong(int count) {
@@ -216,127 +324,5 @@ void pong(int delayn) {
 
   delay(delayn);
   
-}
-
-void publish() {
-  
-  Serial.println("publishing a message");
-  
-  client = PubNub.publish(channel, "\"garage:1\"");
-  
-  if (!client) {
-    Serial.println("publishing error");
-    delay(1000);
-    return;
-  }
-  
-  while (client->connected()) {
-    while (client->connected() && !client->available()) ;
-    char c = client->read();
-    Serial.print(c);
-  }
-  
-  client->stop();
-  Serial.println();
-  
-}
-
-void loop() {
-  
-  Serial.println("waiting for a message (subscribe)");
-  PubSubClient *pclient = PubNub.subscribe(channel);
-  
-  if (!pclient) {
-    Serial.println("subscription error");
-    delay(1000);
-    return;
-  }
-  
-  String messages[10];
-  boolean inside_command = false; 
-  int num_commands = 0;
-  
-  String message = "";
-  char c;
-  
-  while (pclient->wait_for_data()) {
-    
-    c = pclient->read();
-    
-    if(inside_command && c != '"') {
-      messages[num_commands] += c;
-    }
-
-    if(c == '"') {
-  
-      if(inside_command) {         
-        
-        num_commands = num_commands + 1;
-        inside_command = false;
-        
-      } else {     
-        inside_command = true;
-      }
-      
-    }
-  
-    message += c;
-
-  }
-  
-  for (i = 0; i < num_commands; i++){
-    
-    int colonIndex = messages[i].indexOf(':');
-    
-    String subject = messages[i].substring(0, colonIndex);
-    String valueString = messages[i].substring(colonIndex + 1, messages[i].length());
-    boolean value = false;
-    
-    if(valueString == "1") {
-      value = true;
-    }
-
-    if(subject == "garage") {
-      garage(value);
-    }
-
-    if(subject == "door") {
-      door(value);
-    }
-
-    if(subject == "lightLeft") {
-      light(lightLeft, value);
-    }
-
-    if(subject == "lightRight") {
-      light(lightRight, value);
-    }
-
-    if(subject == "lightRoom") {
-      light(lightRoom, value);
-    }
-
-    if(subject == "lightGarage") {
-      light(lightGarage, value);
-    }
-    
-    if(subject == "blink") {
-      blink(100, value);
-    }
-    
-    if(subject == "pingpong") {
-      pingpong(value);
-    }
-
-    Serial.println(subject);
-    Serial.println(value);
-    
-  }
-  
-  Serial.print(message);
-  
-  pclient->stop();
-  Serial.println();
-
 }
 
