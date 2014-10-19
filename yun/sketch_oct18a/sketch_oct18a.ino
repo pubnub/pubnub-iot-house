@@ -90,7 +90,7 @@ void loop() {
 
   thejson2.toCharArray(sub_buff, 200);
   
-  JsonParser<3> parser;
+  JsonParser<64> parser;
   JsonArray root = parser.parseArray(sub_buff);
 
   if (!root.success()) {
