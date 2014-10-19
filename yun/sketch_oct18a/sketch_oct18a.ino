@@ -50,15 +50,7 @@ void setup() {
 
 String timetoken = "0";
 
-
 void loop() {
-
-  subscribe(); 
-  delay(2000);
- 
-}
-
-void subscribe() {
   
   Serial.println("subscribe called");
 
@@ -68,12 +60,14 @@ void subscribe() {
   String message = "hello, I am Yun";
 
   String url = "http://pubsub.pubnub.com/subscribe/" + sub + "/" + chan + "/0/" + timetoken;
+  
+  char sub_buff[200];
+  char next_char;
+  String thejson;
 
   Serial.println(url);
-  client.get(url);
+  client.getAsynchronously(url);
   
-  Serial.println(client.getResult());
-
   // Wait for the http request to complete
   while (!client.ready()) {
     
@@ -81,10 +75,6 @@ void subscribe() {
     delay(100); // or do other stuff
   
   }
-  
-  char sub_buff[200];
-  char next_char;
-  String thejson;
   
   while (client.available()) {
   
@@ -128,7 +118,6 @@ void subscribe() {
   if (!root.success()) {
     
     Serial.println("fail");
-    client.stop();
   
   } else {
     
@@ -200,6 +189,7 @@ void subscribe() {
   }
 
   Serial.flush();
+  delay(2000);
   
 }
 
