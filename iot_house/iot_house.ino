@@ -20,7 +20,7 @@ int i;
 
 EthernetClient *client;
 
-#define W5200_CS  10
+#define W5200_CS  3
 #define SDCARD_CS 4
 
 char pubkey[] = "demo";
@@ -29,11 +29,11 @@ char channel[] = "pubnub_iot_house";
 
 void setup()
 {
-
-
+  
   pinMode(SDCARD_CS,OUTPUT);
   digitalWrite(SDCARD_CS,HIGH);//Deselect the SD card
-    
+  
+  /*  
 	Serial.begin(9600);
 	Serial.println("Serial set up");
 
@@ -43,20 +43,25 @@ void setup()
 		delay(1000);
 	}
 	Serial.println("Ethernet set up");
-        blink(500, 10);
 
 	PubNub.begin(pubkey, subkey);
 	Serial.println("PubNub set up");
+  */
 
-  frontDoor.attach(14);
-  garageDoor.attach(15); 
+  frontDoor.attach(18);
+  garageDoor.attach(19); 
   
   pinMode(lightLeft, OUTPUT);
   pinMode(lightRight, OUTPUT);
   pinMode(lightRoom, OUTPUT);
   pinMode(lightGarage, OUTPUT);
   
-  off();
+  blink(100, 999);
+  reset();
+
+  open();
+  delay(1000);
+  close();
   
 }
 
@@ -69,30 +74,6 @@ void flash(int ledPin)
 		digitalWrite(ledPin, LOW);
 		delay(100);
 	}
-}
-
-
-void publish() {
-  
-  Serial.println("publishing a message");
-  
-  client = PubNub.publish(channel, "\"house:subscribe_error\"");
-  
-  if (!client) {
-    Serial.println("publishing error");
-    delay(1000);
-    return;
-  }
-  
-  while (client->connected()) {
-    while (client->connected() && !client->available()) ;
-    char c = client->read();
-    Serial.print(c);
-  }
-  
-  client->stop();
-  Serial.println();
-  
 }
 
 void loop()
@@ -108,7 +89,6 @@ void loop()
 	client = PubNub.subscribe(channel);
 
 	if (!client) {
-                publish();
 		Serial.println("subscription error");
 		return;
 	}
@@ -159,12 +139,12 @@ void loop()
       value = true;
     }
 
-    if(subject == "garage") {
-      garage(value);
-    }
-
     if(subject == "door") {
       door(value);
+    }
+
+    if(subject == "garage") {
+      garage(value);
     }
 
     if(subject == "lightLeft") {
@@ -223,9 +203,9 @@ void garage(boolean open){
   Serial.println("garage");
   
   if(open) {
-     garageDoor.write(0);
+     garageDoor.write(30);
   } else {
-     garageDoor.write(90);
+     garageDoor.write(80);
   }
   
 }
@@ -235,9 +215,9 @@ void door(boolean open){
   Serial.println("door");
   
   if(open) {
-     frontDoor.write(90);
+     frontDoor.write(80);
   } else {
-     frontDoor.write(0);
+     frontDoor.write(20);
   }
   
 }
