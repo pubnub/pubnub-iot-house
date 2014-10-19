@@ -27,7 +27,7 @@ void setup() {
   while (!Serial); // wait for a serial connection
 }
 
-int timetoken = 0;
+String timetoken = "0";
 void loop() {
 
   // Initialize the client library
@@ -38,8 +38,10 @@ void loop() {
   String chan = "pubnub_iot_house";
   String message = "hello, I am Yun";
 
-//  client.getAsynchronously("http://pubsub.pubnub.com/publish/" + pub + "/" + sub + "/0/" + chan + "/0/" + message);
-  client.getAsynchronously("http://pubsub.pubnub.com/subscribe/" + pub + "/" + sub + "/" + chan + "/0/" + timetoken + "/");
+  String url = "http://pubsub.pubnub.com/subscribe/" + sub + "/" + chan + "/0/" + timetoken;
+
+  Serial.println(url);
+  client.getAsynchronously(url);
 
   // Wait for the http request to complete
 
@@ -56,6 +58,8 @@ void loop() {
   
     next_char = client.read();
     
+    Serial.print(next_char);
+    
     if(String(next_char) == '\0') {
       break;
     } else {
@@ -67,7 +71,7 @@ void loop() {
   Serial.println(thejson);
   
   int firstParen = thejson.indexOf('(');
-  int lastParen = thejson.indexOf(')');
+  int lastParen = thejson.lastIndexOf(')');
 
   String thejson2 = "";
   
@@ -93,11 +97,11 @@ void loop() {
     Serial.println("fail");
   }
 
-  String a = root.getString(1);
-  Serial.println(a);
- 
+  timetoken = root.getString(1);
+  Serial.println(timetoken);
+  
   delay(5000);
-
+ 
 }
 
 
