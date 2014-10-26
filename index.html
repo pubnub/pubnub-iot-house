@@ -1,188 +1,88 @@
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href='http://fonts.googleapis.com/css?family=Roboto:400,700,300' rel='stylesheet' type='text/css'>
-  <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jquerymobile/1.4.3/jquery.mobile.min.css" />
+  <title>Take Control of the PubNub House</title>
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-  <script src="//ajax.googleapis.com/ajax/libs/jquerymobile/1.4.3/jquery.mobile.min.js"></script>
-  <script src="http://cdn.pubnub.com/pubnub.min.js"></script>
   <style type="text/css">
     * {
-    font-family: 'Roboto', sans-serif !important;
-    font-weight: 300;
+      font-family: 'Roboto', sans-serif !important;
     }
-    .ui-header {
-      background-color: #ce1126 !important;
-      color: #fff !important;
-      text-shadow: 0px 2px 1px #88000F !important;
-      border-top: 1px solid #DB5362 !important;
-      border-bottom: 1px solid #88000F !important;
+    body {
+      padding: 9% 10%;
+      font-size: 100%;
+    }
+    img {
+      max-width: 100%;
+    }
+    #pitch img {
+      margin-bottom: 9%;
+    }
+    #pitch p {
+      margin-bottom: 9%;
     }
     a {
-      color: #ce1126 !important;
+      text-align: center;
+      background-color: #ce1126;
+      display: block;
+      border-radius: 15px;
+      margin: 0px auto;
+      line-height: 1em;
+      color: #fff;
+      font-weight: normal;
       text-decoration: none;
-    }
-    .ui-bar-a {
-      background-color: #f2f2f2 !important;
-    }
-    .ui-header h1.ui-title {
+      font-size: 200%;
       font-weight: bold;
-      margin: 0px !important;
-      font-size: 24px;
+      text-align: center;
+      box-shadow: 0px 1px 1px #88000F;
+      text-shadow: 0px 1px 1px #88000F;
+      width: 100%;
+      left: 5%;
+      padding-top: 50px;
+      padding-bottom: 50px;
     }
-    h3.ui-bar {
-      padding-top: 15px;
-      padding-bottom: 15px;
+    #iot {
+      display: inline-block;
+      background-color: #ce1126;
+      height: 40px;
+      width: 40px;
+      position: relative;
+      top: 5px;
+      margin-right: 10px;
     }
-    .ui-block-b {
-      text-align: right;
+    #pitch {
+      width: 100%;
+      margin: 0px auto;
+      margin-bottom: 9%;
     }
-    .ui-bar:first-of-type {
-      margin-top: 0px;
-    }
-    .ui-body .ui-grid-a {
-      border-bottom: 1px solid #efefef;
-      padding-bottom: 10px;
-      padding-top: 6px;
-    }
-    .ui-body .ui-grid-a:last-child {
-      border-bottom: none;
-    }
-    legend {
-      padding-top: 19px !important;
-    }
-    .ui-block-b {
-      font-size: 0px;
-    }
-    .toggle .ui-block-b button:first-of-type {
-      border-top-right-radius: 0px;
-      border-bottom-right-radius: 0px;
-      margin-right: 0px !important;
-      border-right: 0px;
-    }
-    .toggle .ui-block-b button:last-of-type {
-      border-top-left-radius: 0px;
-      border-bottom-left-radius: 0px;
-      margin-lefT: 0px !important;
-    }
-    .ui-grid-a>.ui-block-a {
-      width: 25% !important;
-    }
-    .ui-grid-a>.ui-block-b {
-      width: 75% !important;
+    @media only screen and (min-width: 1224px) {
+      body {
+        padding: 20px 25%;
+      }
+      #pitch {
+        margin-bottom: 40px;
+      }
+      #pitch img {
+        margin-bottom: 40px;
+      }
+      #pitch p {
+        margin-bottom: 40px;
+      }
     }
   </style>
 </head>
 <body>
-  <div data-role="page">
-
-    <div data-role="header">
-      <h1>The PubNub IOT House</h1>
-    </div>
-
-    <div data-role="content"> 
-      <h3 class="ui-bar ui-bar-a ui-corner-all">Lights</h3>
-      <div class="ui-body ui-body-a ui-corner-all">
-        <div class="ui-grid-a toggle" id="lightLeft">
-          <legend class="ui-block-a">Left:</legend>
-          <div class="ui-block-b">
-            <button type="button" class="ui-shadow ui-btn ui-corner-all ui-btn-inline" value="1">On</button>
-            <button type="button" class="ui-shadow ui-btn ui-corner-all ui-btn-inline" value="0">Off</button>
-          </div>
-        </div>
-        <div class="ui-grid-a toggle" id="lightRight">
-          <legend class="ui-block-a">Right:</legend>
-          <div class="ui-block-b">
-            <button type="button" class="ui-shadow ui-btn ui-corner-all ui-btn-inline" value="1">On</button>
-            <button type="button" class="ui-shadow ui-btn ui-corner-all ui-btn-inline" value="0">Off</button>
-          </div>
-        </div>
-        <div class="ui-grid-a toggle" id="lightRoom">
-          <legend class="ui-block-a">Kitchen:</legend>
-          <div class="ui-block-b">
-            <button type="button" class="ui-shadow ui-btn ui-corner-all ui-btn-inline" value="1">On</button>
-            <button type="button" class="ui-shadow ui-btn ui-corner-all ui-btn-inline" value="0">Off</button>
-          </div>
-        </div>
-        <div class="ui-grid-a toggle" id="lightGarage">
-          <legend class="ui-block-a">Garage:</legend>
-          <div class="ui-block-b">
-            <button type="button" class="ui-shadow ui-btn ui-corner-all ui-btn-inline" value="1">On</button>
-            <button type="button" class="ui-shadow ui-btn ui-corner-all ui-btn-inline" value="0">Off</button>
-          </div>
-        </div>
-      </div>
-      <h3 class="ui-bar ui-bar-a ui-corner-all">Doors</h3>
-      <div class="ui-body ui-body-a ui-corner-all">
-        <div class="ui-grid-a toggle" id="door">
-          <legend class="ui-block-a">Front:</legend>
-          <div class="ui-block-b">
-            <button type="button" class="ui-shadow ui-btn ui-corner-all ui-btn-inline" value="1">Open</button>
-            <button type="button" class="ui-shadow ui-btn ui-corner-all ui-btn-inline" value="0">Close</button>
-          </div>
-        </div>
-        <div class="ui-grid-a toggle" id="garage">
-          <legend class="ui-block-a">Garage:</legend>
-          <div class="ui-block-b">
-            <button type="button" class="ui-shadow ui-btn ui-corner-all ui-btn-inline" value="1">Open</button>
-            <button type="button" class="ui-shadow ui-btn ui-corner-all ui-btn-inline" value="0">Close</button>
-          </div>
-        </div>
-      </div>
-      <h3 class="ui-bar ui-bar-a ui-corner-all">Functions</h3>
-      <div class="ui-body ui-body-a ui-corner-all">
-        <div class="ui-grid-a" id="blink">
-          <legend class="ui-block-a">Blink:</legend>
-          <div class="ui-block-b">
-            <button type="button" class="ui-shadow ui-btn ui-corner-all ui-btn-inline" value="5">Blink</button>
-          </div>
-        </div>
-        <div class="ui-grid-a" id="demo">
-          <legend class="ui-block-a">Demo:</legend>
-          <div class="ui-block-b">
-            <button type="button" class="ui-shadow ui-btn ui-corner-all ui-btn-inline" value="1">Demo</button>
-          </div>
-        </div>
-        <div class="ui-grid-a toggle" id="async">
-          <legend class="ui-block-a">Async:</legend>
-          <div class="ui-block-b">
-            <button type="button" class="ui-shadow ui-btn ui-corner-all ui-btn-inline" value="1">On</button>
-            <button type="button" class="ui-shadow ui-btn ui-corner-all ui-btn-inline" value="0">Off</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div data-role="footer">
-      <h4>Powered by <a href="http://pubnub.com">PubNub</a></h4>
-    </div>
-
+  <div id="pitch">
+    <img src="http://www.pubnub.com/static/images/iot/iot-header.png" />
+    <p>PubNub is the protocol that allows any device to communicate with the Arduino powering the model house in front of you.</p>
+    <ul>
+      <li>Plug & play: No port-forwarding, no customer-service hassles</li>
+      <li>Consumer control anywhere, in or out of the house</li>
+      <li>Instant notifications when home loses Internet connection</li>
+      <li>Globally scaled network with Message delivery in under ¼ second</li>
+      <li>Powerful security</li>
+    </ul>
   </div>
-
-  <script>
-    $(function() {
-    
-      var channel = "pubnub_iot_house";
-
-      var pubnub = PUBNUB.init({
-        publish_key: 'demo',
-        subscribe_key: 'demo'
-      });
-      
-      $('button').click(function(){
-
-        var value = $(this).val();
-        var module = $(this).parent().parent().attr('id');
-        
-        pubnub.publish({
-          channel: channel,
-          message: {
-            name: module,
-            value: value
-          }
-        });
-          
-      });
-      
-    });
-  </script>
+  <a href="/remote.html" target="_top" id="control">
+    <img src="http://www.pubnub.com/static/images/iot/HomeAutomation.png" id="iot"/>
+    Take Control of the IOT House
+  </a>
 </body>
