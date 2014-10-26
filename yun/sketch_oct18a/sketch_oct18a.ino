@@ -11,40 +11,34 @@ HttpClient client;
 Servo frontDoor;
 Servo garageDoor;
 
-int lightLeft = 8;
-int lightRight = 7;
-int lightRoom = 6;
-int lightGarage = 5;
+int lightLeft = 11;
+int lightRight = 10;
+int lightRoom = 9;
+int lightGarage = 8;
+int servoDoor = 7;
+int servoGarage = 6;
+
+bool asyncdemo = false;
 
 void setup() {
   // Bridge takes about two seconds to start up
   // it can be helpful to use the on-board LED
   // as an indicator for when it has initialized
-  pinMode(13, OUTPUT);
-  digitalWrite(13, LOW);
   Bridge.begin();
-  digitalWrite(13, HIGH);
   
-  client.setTimeout(10000);
-
-  Serial.begin(9600);
-
-  while (!Serial); // wait for a serial connection
-  
-  frontDoor.attach(18);
-  garageDoor.attach(19); 
+  client.setTimeout(2000);
   
   pinMode(lightLeft, OUTPUT);
   pinMode(lightRight, OUTPUT);
   pinMode(lightRoom, OUTPUT);
   pinMode(lightGarage, OUTPUT);
   
-  blink(100, 5);
-  reset();
+  blink(300, 5);
+  
+  frontDoor.attach(servoDoor);
+  garageDoor.attach(servoGarage); 
 
-  open();
-  delay(1000);
-  close();
+  reset();
   
 }
 
@@ -70,9 +64,11 @@ void loop() {
   
   // Wait for the http request to complete
   while (!client.ready()) {
-    
-    Serial.println("request is being made");
-    delay(100); // or do other stuff
+
+    if(asyncdemo) {
+      pingpong(1);
+      off();
+    }
   
   }
   
@@ -183,13 +179,20 @@ void loop() {
       if(name == "pingpong") {
         pingpong(valueString.toInt());
       }
+      
+      if(name == "demo") {
+        demo();
+      }
+      
+      if(name == "async") {
+        asyncdemo = value;
+      }
     
     }
     
   }
 
   Serial.flush();
-  delay(2000);
   
 }
 
@@ -232,10 +235,7 @@ void door(boolean open){
 void reset() {
   garage(false);
   door(false);
-  light(lightLeft, false);
-  light(lightRight, false);
-  light(lightRoom, false);
-  light(lightGarage, false);
+  off();
 }
 
 void on() {
@@ -273,14 +273,19 @@ void pingpong(int count) {
 }
 
 void demo() {
-  
-  blink(100, 5);
-
-  delay(1000);
+    
+  pingpong(1);
 
   open();
-  delay(1000);
+
+  delay(500);
+
   close();
+
+  delay(500);
+
+  blink(100, 5);
+  
 }
 
 void open() {

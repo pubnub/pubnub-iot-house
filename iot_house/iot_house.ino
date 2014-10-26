@@ -1,6 +1,6 @@
+#include <PubNub.h>
 #include <SPI.h>
 #include <EthernetV2_0.h>
-#include <PubNub.h>
 #include <string.h>
 #include <Servo.h>
 
@@ -33,7 +33,6 @@ void setup()
   pinMode(SDCARD_CS,OUTPUT);
   digitalWrite(SDCARD_CS,HIGH);//Deselect the SD card
   
-  /*  
 	Serial.begin(9600);
 	Serial.println("Serial set up");
 
@@ -46,7 +45,6 @@ void setup()
 
 	PubNub.begin(pubkey, subkey);
 	Serial.println("PubNub set up");
-  */
 
   frontDoor.attach(18);
   garageDoor.attach(19); 
@@ -58,11 +56,15 @@ void setup()
   
   blink(100, 999);
   reset();
-
-  open();
-  delay(1000);
-  close();
   
+  while(true) {
+
+    open();
+    delay(1000);
+    close();
+    delay(1000);  
+  }
+
 }
 
 void flash(int ledPin)
